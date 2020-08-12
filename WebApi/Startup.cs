@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.Activities;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -31,7 +33,19 @@ namespace WebApi
             {
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
-            
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                        .WithOrigins("http://localhost:3000");
+                });
+            });
+            services.AddMediatR(typeof(ListHandler.Handler).Assembly);
             services.AddControllers();
         }
 
@@ -44,6 +58,8 @@ namespace WebApi
             }
 
             app.UseRouting();
+
+            app.UseCors("CorsPolicy");
 
             app.UseAuthorization();
 
